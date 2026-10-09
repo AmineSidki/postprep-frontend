@@ -9,7 +9,9 @@ declare module 'axios' {
 }
 
 export const api = axios.create({
-  baseURL: "https://aminesidki-postprep.hf.space/api/v1",
+  // Keep this relative. Auth cookies are SameSite=Strict, so the browser only sends them when the
+  // API looks same-site: Vite's proxy does that in dev, vercel.json's rewrite does it in production.
+  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
   withCredentials: true, // auth lives in HttpOnly cookies
   headers: { 'Content-Type': 'application/json' },
 });
