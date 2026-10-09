@@ -9,7 +9,7 @@ declare module 'axios' {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
+  baseURL: "https://aminesidki-postprep.hf.space",
   withCredentials: true, // auth lives in HttpOnly cookies
   headers: { 'Content-Type': 'application/json' },
 });
