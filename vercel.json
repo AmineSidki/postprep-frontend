@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://aminesidki-postprep.hf.space/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
