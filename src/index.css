@@ -2,30 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  /* Dark space background with a subtle noise texture */
-  background: 
-    linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)),
-    url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  font-family: 'Courier New', Courier, monospace; 
-  color: #e2e8f0; /* Light gray text for readability */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  body {
+    @apply m-0 min-h-screen bg-ink-950 font-sans text-sm leading-relaxed text-slate-200 antialiased;
+  }
+  ::selection {
+    @apply bg-pink-400/30 text-white;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 9999px;
+  }
 }
 
-/* Custom scrollbar to match the dark theme */
-::-webkit-scrollbar {
-  width: 8px;
+@layer components {
+  /* Frosted glass. Only large containers get backdrop-blur: it is the expensive part. */
+  .glass {
+    @apply rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl;
+  }
+
+  .eyebrow {
+    @apply text-[11px] uppercase tracking-[0.22em] text-slate-400;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-pink-400/50 focus:ring-2 focus:ring-pink-400/20;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border border-white/10 bg-gradient-to-r from-wine to-wine-700 text-white shadow-lg shadow-wine/30 hover:from-wine-600 hover:to-wine;
+  }
+  .btn-ghost {
+    @apply border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10;
+  }
+  .btn-danger {
+    @apply border border-red-400/30 bg-red-500/15 text-red-100 hover:bg-red-500/25;
+  }
+  .icon-btn {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200;
+  }
+
+  /* Ambient blobs: radial gradients (no CSS blur filter) animated with transforms only. */
+  .blob {
+    @apply pointer-events-none absolute rounded-full will-change-transform;
+  }
+  .blob-pink {
+    width: 46rem;
+    height: 46rem;
+    top: -14rem;
+    left: -12rem;
+    background: radial-gradient(closest-side, rgba(219, 39, 119, 0.32), transparent);
+    animation: drift-a 30s ease-in-out infinite alternate;
+  }
+  .blob-purple {
+    width: 40rem;
+    height: 40rem;
+    right: -10rem;
+    bottom: -12rem;
+    background: radial-gradient(closest-side, rgba(124, 58, 237, 0.3), transparent);
+    animation: drift-b 36s ease-in-out infinite alternate;
+  }
+  .blob-wine {
+    width: 30rem;
+    height: 30rem;
+    top: 40%;
+    left: 55%;
+    background: radial-gradient(closest-side, rgba(139, 46, 73, 0.28), transparent);
+    animation: drift-c 42s ease-in-out infinite alternate;
+  }
 }
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+
+@keyframes drift-a {
+  to { transform: translate3d(10vw, 12vh, 0) scale(1.1); }
 }
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+@keyframes drift-b {
+  to { transform: translate3d(-12vw, -10vh, 0) scale(1.12); }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+@keyframes drift-c {
+  to { transform: translate3d(-14vw, 8vh, 0) scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none; }
+  .animate-fade-in { animation: none; }
 }

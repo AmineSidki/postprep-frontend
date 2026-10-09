@@ -1,12 +1,22 @@
-// Add/Update these interfaces
+// Mirrors the PostPrep backend DTOs.
 
-export enum ArticleStatus {
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+export type Role = 'USER' | 'ADMIN';
+export type ArticleStatus = 'PROCESSING' | 'PROCESSED' | 'INTERRUPTED';
+
+/** Client-side session. The backend has no "who am I" endpoint, so this is assembled at login. */
+export interface User {
+  email: string | null;
+  role: Role;
 }
 
-// Matches LiteArticleDTO
+export interface AppUserDTO {
+  id: string;
+  username: string;
+  email: string;
+  role: Role;
+}
+
+/** LiteArticleDTO: used by every list endpoint. */
 export interface LiteArticle {
   id: string;
   title: string | null;
@@ -14,33 +24,28 @@ export interface LiteArticle {
   status: ArticleStatus;
 }
 
-// Matches ArticleDTO (The full version)
+export interface OutputJson {
+  summary: string | null;
+  categories: string[] | null;
+  seoTitle: string | null;
+  confidenceScore: number | null;
+  keywords: string[] | null;
+}
+
+/** ArticleDTO: returned by GET /article/{id} and the upload endpoints. */
 export interface Article {
   id: string;
   title: string | null;
-  language: string;
+  language: string | null;
   owner: string;
   status: ArticleStatus;
-  createdAt: string; // Timestamp comes as string in JSON
-  outputJson: {
-    title?: string;
-    summary?: string;
-    keywords?: string[];
-    seoTitle?: string;
-    categories?: string[];
-  } | null;
-}
-export interface AppUserDTO {
-  id: string;
-  email: string;
-  username: string;
-  role: string; // Assuming backend sends "ADMIN" or "USER"
-  createdAt?: string;
+  outputJson: OutputJson | null;
+  createdAt: string | null;
 }
 
 export interface ChartDataDTO {
-  label: string; // Date or Category
-  value: number; // Count
+  label: string;
+  value: number;
 }
 
 export interface GlobalStats {
