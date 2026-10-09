@@ -1,87 +1,63 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { Background } from './components/Background';
+import { Navbar } from './components/Navbar';
+import { PageSpinner } from './components/Spinner';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { MyArticles } from './pages/MyArticles';
-import { Navbar } from './components/Navbar';
+import { AdminLayout } from './pages/admin/AdminLayout';
 
-// Admin Imports
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { AdminUsers } from './pages/admin/AdminUsers';
-import { AdminArticles } from './pages/admin/AdminArticles';
+// Admin screens are rarely opened by most users, so they load on demand.
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard })));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers').then((m) => ({ default: m.AdminUsers })));
+const AdminArticles = lazy(() => import('./pages/admin/AdminArticles').then((m) => ({ default: m.AdminArticles })));
 
-// 1. The Layout Component (Handles the UI wrapper + Protection)
-const PrivateLayout = () => {
+/** Protects private routes and wraps them in the navbar. */
+function PrivateLayout() {
   const { user, loading } = useAuth();
 
-  // If we are still checking the session, show a spinner (prevents "flicker")
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
-      </div>
-    );
-  }
+  if (loading) return <PageSpinner />;
+  if (!user) return <Navigate to="/login" replace />;
 
-  // If checking is done and no user, kick them out
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // If user exists, render the Navbar and the requested page (Outlet)
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="flex-1 p-4 md:p-8">
-        <Outlet /> {/* This is where Dashboard, MyArticles, etc. will appear */}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <Suspense fallback={<PageSpinner />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );
-};
+}
 
-// 2. The Admin Guard (Specific for Admin routes)
-const AdminGuard = () => {
-  const { user } = useAuth();
-  
-  // Note: We don't need to check 'loading' here because PrivateLayout already handled it
-  if (!user || user.role !== 'ADMIN') {
-    return <Navigate to="/" replace />; 
-  }
-
-  return <Outlet />;
-};
-
-function App() {
+export default function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <div className="min-h-screen bg-slate-900 text-slate-200">
+    <BrowserRouter>
+      <ToastProvider>
+        <AuthProvider>
+          <Background />
           <Routes>
-            
-            {/* PUBLIC ROUTES */}
             <Route path="/login" element={<Login />} />
 
-            {/* PROTECTED ROUTES (Wrapped in PrivateLayout) */}
             <Route element={<PrivateLayout />}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/my-articles" element={<MyArticles />} />
+              <Route index element={<Dashboard />} />
+              <Route path="my-articles" element={<MyArticles />} />
 
-              {/* NESTED ADMIN ROUTES */}
-              <Route path="/admin" element={<AdminGuard />}>
+              <Route path="admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="articles" element={<AdminArticles />} />
               </Route>
             </Route>
 
-            {/* CATCH ALL (404) - Optional, redirects unknown paths to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
-
           </Routes>
-        </div>
-      </AuthProvider>
-    </Router>
+        </AuthProvider>
+      </ToastProvider>
+    </BrowserRouter>
   );
 }
-
-export default App;
